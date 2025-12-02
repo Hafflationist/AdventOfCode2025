@@ -1,0 +1,70 @@
+let
+  pkgs = import <nixpkgs> {};
+  lib = pkgs.lib;
+
+  mod = a: b: let
+    newA = a + 10 * b;
+  in
+    newA - (b * (newA / b));
+  abs = a:
+    if a > 0
+    then a
+    else -a;
+
+  parseSingleRange = rangeStr: let
+    parts = rangeStr |> builtins.split "-" |> builtins.filter (elem: elem != []);
+  in {
+    begin = builtins.fromJSON (builtins.elemAt parts 0);
+    end = builtins.fromJSON (builtins.elemAt parts 1);
+  };
+
+  explodeRange = range: let
+    begin = range.begin;
+    end = range.end;
+  in
+    lib.lists.range begin end;
+
+  parseRanges = content:
+    content
+    |> builtins.split ","
+    |> builtins.filter (elem: elem != [])
+    |> builtins.map parseSingleRange;
+
+  checkNumber = number: let
+    numberStr = builtins.toString number;
+    numberStrLength = builtins.stringLength numberStr;
+    firstHalf = builtins.substring 0 (numberStrLength / 2) numberStr;
+    secondHalf = builtins.substring (numberStrLength / 2) (-1) numberStr;
+  in
+    if firstHalf == secondHalf
+    then number
+    else 0;
+
+  solver1 = file: let
+    fileContent = builtins.readFile file;
+  in
+    fileContent
+    |> parseRanges
+    |> builtins.concatMap explodeRange
+    |> builtins.map checkNumber
+    |> builtins.foldl' (a: b: a + b) 0;
+
+  solver2 = file: let
+    fileContent = builtins.readFile file;
+  in
+    fileContent
+    |> parseRanges
+    |> builtins.concatMap explodeRange
+    |> builtins.map checkNumber
+    |> builtins.foldl' (a: b: a + b) 0;
+
+  solver2 = file: let
+    fileContent = builtins.readFile file;
+  in
+    0;
+in {
+  check1 = solver1 ./inputs/check.txt;
+  part1 = solver1 ./inputs/part1.txt;
+  check2 = solver2 ./inputs/check.txt;
+  part2 = solver2 ./inputs/part2.txt;
+}
