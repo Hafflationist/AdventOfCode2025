@@ -5,5 +5,5 @@ default:
     @echo "Available tasks: t1"
 
 # Evaluate day 1
-t1:
-    nix eval -f T1/default.nix
+eval TAG:
+  nix eval --extra-experimental-features pipe-operators --option max-call-depth 4294967295 -f {{TAG}}/default.nix
